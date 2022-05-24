@@ -95,8 +95,8 @@ def main():
 
 if __name__ == '__main__':
     # load model
-    protopath = "MobileNetSSD_deploy.prototxt"
-    modelpath = "MobileNetSSD_deploy.caffemodel"
+    protopath = "camcount/MobileNetSSD_deploy.prototxt"
+    modelpath = "camcount/MobileNetSSD_deploy.caffemodel"
     detector = cv2.dnn.readNetFromCaffe(prototxt=protopath, caffeModel=modelpath)
     # load class in mobilenet
     CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",

@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import os
 from threading import Thread
+import sys
 
 def confirm_yesno(message = 'ยืนยันที่จะปิดโปรแกรมหรือไม่'):
     if messagebox.askyesno(title='confirmation',message=message):

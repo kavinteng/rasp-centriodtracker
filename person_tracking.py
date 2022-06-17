@@ -107,8 +107,8 @@ def gender_age(frame,faceNet,ageNet,genderNet):
                 age = ageList[agePreds[0].argmax()]
                 # age_array.append(age)
 
-        return gender,age
-
+                return gender,age
+        return '-', '-'
     else:
         return '-','-'
 

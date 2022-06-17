@@ -11,15 +11,14 @@ def confirm_yesno(message = 'ยืนยันที่จะปิดโปร
 
 def click_cam(num):
     if num == 1:
-        os.system('python person_tracking.py rtsp://admin:888888@192.168.7.50:10554/tcp/av0_0')
+        os.system('python person_tracking_yolo.py rtsp://admin:888888@192.168.7.50:10554/tcp/av0_0')
     elif num == 2:
-        os.system('python person_tracking.py rtsp://admin:888888@192.168.7.60:10554/tcp/av0_0')
+        os.system('python person_tracking_yolo.py rtsp://admin:888888@192.168.7.60:10554/tcp/av0_0')
     elif num == 3:
-        os.system('python person_tracking.py rtsp_subtype')
+        os.system('python person_tracking_yolo.py rtsp_subtype')
 
 def click_cam_thread(num):
     t = Thread(target=click_cam, args=(num,))
-    t.daemon = True
     t.start()
 
 if __name__ == '__main__':

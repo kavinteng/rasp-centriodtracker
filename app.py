@@ -19,6 +19,7 @@ def click_cam(num):
 
 def click_cam_thread(num):
     t = Thread(target=click_cam, args=(num,))
+    t.daemon = True
     t.start()
 
 if __name__ == '__main__':

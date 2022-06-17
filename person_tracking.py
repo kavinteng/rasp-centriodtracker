@@ -96,6 +96,7 @@ def gender_age(frame,faceNet,ageNet,genderNet):
                          min(faceBox[3] + padding, frame.shape[0] - 1), max(0, faceBox[0] - padding)
                                                                         :min(faceBox[2] + padding, frame.shape[1] - 1)]
             if face is not None:
+                print(face)
                 blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
                 genderNet.setInput(blob)
                 genderPreds = genderNet.forward()

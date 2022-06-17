@@ -88,24 +88,27 @@ def gender_age(frame,faceNet,ageNet,genderNet):
     resultImg, faceBoxes = highlightFace(faceNet, frame)
     # if not faceBoxes:
     #     print("No face detected")
-    print(faceBoxes)
-    for faceBox in faceBoxes:
-        face = frame[max(0, faceBox[1] - padding):
-                     min(faceBox[3] + padding, frame.shape[0] - 1), max(0, faceBox[0] - padding)
-                                                                    :min(faceBox[2] + padding, frame.shape[1] - 1)]
+    if len(faceBoxes) > 0:
+        for faceBox in faceBoxes:
+            face = frame[max(0, faceBox[1] - padding):
+                         min(faceBox[3] + padding, frame.shape[0] - 1), max(0, faceBox[0] - padding)
+                                                                        :min(faceBox[2] + padding, frame.shape[1] - 1)]
 
-        blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
-        genderNet.setInput(blob)
-        genderPreds = genderNet.forward()
-        gender = genderList[genderPreds[0].argmax()]
-        # gender_array.append(gender)
+            blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
+            genderNet.setInput(blob)
+            genderPreds = genderNet.forward()
+            gender = genderList[genderPreds[0].argmax()]
+            # gender_array.append(gender)
 
-        ageNet.setInput(blob)
-        agePreds = ageNet.forward()
-        age = ageList[agePreds[0].argmax()]
-        # age_array.append(age)
+            ageNet.setInput(blob)
+            agePreds = ageNet.forward()
+            age = ageList[agePreds[0].argmax()]
+            # age_array.append(age)
 
-    return gender,age
+        return gender,age
+
+    else:
+        return '-','-'
 
 def main():
     # cap = cv2.VideoCapture("test_video.mp4")

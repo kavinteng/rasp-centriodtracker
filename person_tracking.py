@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 from centroidtracker import CentroidTracker
 import time
+from threading import Thread
+import sys
 
 def non_max_suppression_fast(boxes, overlapThresh):
     try:
@@ -110,13 +112,16 @@ def gender_age(frame,faceNet,ageNet,genderNet):
     else:
         return '-','-'
 
-def main():
+def main(rtsp):
     # cap = cv2.VideoCapture("test_video.mp4")
-    cap = cv2.VideoCapture('rtsp://admin:888888@192.168.7.50:10554/tcp/av0_0')
+    cap = cv2.VideoCapture(rtsp)
     st = None
-
+    print(f'start cam: {rtsp}')
     while True:
         ret, frame = cap.read()
+        if ret == False:
+            print(f'stop {rtsp}')
+            break
         if frame is None:
             continue
         if st == None:
@@ -164,7 +169,7 @@ def main():
                 text = "ID: {} {} {}".format(objectId,gender,age)
                 cv2.putText(frame, text, (x1, y1-5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
             st = time.time()
-            cv2.imshow("camera", frame)
+            cv2.imshow(f"{rtsp}", frame)
 
             k = cv2.waitKey(1)
             if k == ord('q'):
@@ -172,7 +177,15 @@ def main():
     cap.release()
     cv2.destroyAllWindows()
 
+def main_threading(rtsp):
+    m = Thread(target=main, args=(rtsp,))
+    # m.daemon = True
+    m.start()
+
 if __name__ == '__main__':
+    rtsp_input = sys.argv[1]
+    if rtsp_input == 'rtsp_subtype':
+        rtsp_input = 'rtsp://test:advice128@110.49.125.237:554/cam/realmonitor?channel=1&subtype=0'
     load_all_model()
     # load model
     protopath = "camcount/MobileNetSSD_deploy.prototxt"
@@ -185,5 +198,12 @@ if __name__ == '__main__':
                "sofa", "train", "tvmonitor"]
     # get centroid tracker object
     tracker = CentroidTracker(maxDisappeared=10, maxDistance=90)
+    main(rtsp_input)
+    # main('rtsp://admin:888888@192.168.7.50:10554/tcp/av0_0')
+    # main('rtsp://admin:888888@192.168.7.60:10554/tcp/av0_0')
+    # main('rtsp://test:advice128@110.49.125.237:554/cam/realmonitor?channel=1&subtype=0')
+    # 'rtsp://test:advice128@110.49.125.237:554/cam/realmonitor?channel=1&subtype=0'
 
-    main()
+    # main_threading('rtsp://admin:888888@192.168.7.50:10554/tcp/av0_0')
+    # main_threading('rtsp://admin:888888@192.168.7.60:10554/tcp/av0_0')
+    # main_threading('rtsp://test:advice#128@110.49.125.237:554/cam/realmonitor?channel=1&subtype=0')

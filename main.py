@@ -95,11 +95,11 @@ def gender_age(frame,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderN
         return '-','-'
 
 def load_all_model():
-    # print('start load model!!!')
-    # model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-    # model.conf = 0.5
-    # model.iou = 0.4
-    # print('load yolov5 successfully!!!')
+    print('start load model!!!')
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+    model.conf = 0.5
+    model.iou = 0.4
+    print('load yolov5 successfully!!!')
 
     print('load gender & age model')
     faceProto="gender_age_model/opencv_face_detector.pbtxt"

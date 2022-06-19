@@ -97,7 +97,7 @@ def gender_age(frame,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderN
 def load_all_model():
     print('start load model!!!')
     model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-    model.conf = 0.3
+    model.conf = 0.1
     model.iou = 0.4
     print('load yolov5 successfully!!!')
 
@@ -140,7 +140,7 @@ def main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNe
             break
         else:
             break_vdo = 2
-            results = model(frame, size=640)
+            results = model(frame, size=320)
             out2 = results.pandas().xyxy[0]
 
             if len(out2) != 0:
@@ -232,7 +232,7 @@ def main(rtsp,device):
         if st == None:
             st = time.time()
         et = time.time()
-        if et - st > 0.1:
+        if et - st > 0.2:
             if record == 1:
                 et_vdo = time.time()
                 if et_vdo - st_vdo < 60:

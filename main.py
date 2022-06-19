@@ -101,6 +101,15 @@ def load_all_model():
     model.iou = 0.4
     print('load yolov5 successfully!!!')
 
+    protopath = "camcount/MobileNetSSD_deploy.prototxt"
+    modelpath = "camcount/MobileNetSSD_deploy.caffemodel"
+    detector = cv2.dnn.readNetFromCaffe(prototxt=protopath, caffeModel=modelpath)
+    # load class in mobilenet
+    CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
+               "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+               "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
+               "sofa", "train", "tvmonitor"]
+
     print('load gender & age model')
     faceProto="gender_age_model/opencv_face_detector.pbtxt"
     faceModel="gender_age_model/opencv_face_detector_uint8.pb"
@@ -118,7 +127,7 @@ def load_all_model():
     genderNet=cv2.dnn.readNet(genderModel,genderProto)
     print('load gender & age successfully!!!')
 
-    return MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet,model
+    return MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet,model,detector,CLASSES
 
 def create_folder():
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -130,7 +139,7 @@ def create_folder():
     if os.path.isdir(date_img) == False:
         os.mkdir(date_img)
 
-def main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet,model):
+def main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet,model,detector,CLASSES):
     tracker = CentroidTracker(maxDisappeared=10, maxDistance=90)
     cap = cv2.VideoCapture(file_name)
 
@@ -273,14 +282,5 @@ if __name__ == '__main__':
     device = sys.argv[2]
     if rtsp_input == 'rtsp_subtype':
         rtsp_input = 'rtsp://test:advice128@110.49.125.237:554/cam/realmonitor?channel=1&subtype=0'
-
-    protopath = "camcount/MobileNetSSD_deploy.prototxt"
-    modelpath = "camcount/MobileNetSSD_deploy.caffemodel"
-    detector = cv2.dnn.readNetFromCaffe(prototxt=protopath, caffeModel=modelpath)
-    # load class in mobilenet
-    CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
-               "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
-               "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
-               "sofa", "train", "tvmonitor"]
 
     main(rtsp_input,device)

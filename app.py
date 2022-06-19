@@ -19,7 +19,7 @@ def click_cam(num):
     elif num == 3:
         os.system('python main.py rtsp_subtype 3')
 
-def run_process(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model):
+def run_process(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model,detector,CLASSES):
     date = datetime.date.today()
     break_vdo = 0
     while True:
@@ -27,7 +27,7 @@ def run_process(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderN
             if len(os.listdir(f'backup_file/{date}')) > 0:
                 for file in os.listdir(f'backup_file/{date}'):
                     file_name = f'backup_file/{date}/{file}'
-                    break_vdo = main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet,model)
+                    break_vdo = main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet,model,detector,CLASSES)
 
                     if break_vdo == 2:
                         post_data_out()
@@ -40,18 +40,18 @@ def click_cam_thread(num):
     t = Thread(target=click_cam, args=(num,))
     t.start()
 
-def run_process_thread(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model):
-    p = Thread(target=run_process, args=(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model,))
+def run_process_thread(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model,detector,CLASSES):
+    p = Thread(target=run_process, args=(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model,detector,CLASSES,))
     p.daemon = True
     p.start()
 
 if __name__ == '__main__':
-    MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model = load_all_model()
+    MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model,detector,CLASSES = load_all_model()
     root = Tk()
     root.title('Application Controller')
     root.geometry('250x300+0+0')
 
-    run_process_thread(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model)
+    run_process_thread(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model,detector,CLASSES)
     cam1 = Button(root, text="cam1", width=20, bg='red', fg='white', command=lambda num=1: click_cam_thread(num))
     cam1.pack(padx=5, pady=5)
     cam2 = Button(root, text="cam2", width=20, bg='red', fg='white', command=lambda num=2: click_cam_thread(num))

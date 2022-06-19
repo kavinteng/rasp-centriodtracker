@@ -185,25 +185,25 @@ def main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNe
             #             rects.append([xmin, ymin, xmax, ymax])
             # tracking config & non max suppression
             # print(rects)
-                boundingboxes = np.array(rects)
-                boundingboxes = boundingboxes.astype(int)
-                rects = non_max_suppression_fast(boundingboxes, 0.3)
-                # print(rects)
-                objects = tracker.update(rects)
-                for (objectId, bbox) in objects.items():
-                    x1, y1, x2, y2 = bbox
-                    x1 = int(x1)
-                    y1 = int(y1)
-                    x2 = int(x2)
-                    y2 = int(y2)
+            boundingboxes = np.array(rects)
+            boundingboxes = boundingboxes.astype(int)
+            rects = non_max_suppression_fast(boundingboxes, 0.3)
+            # print(rects)
+            objects = tracker.update(rects)
+            for (objectId, bbox) in objects.items():
+                x1, y1, x2, y2 = bbox
+                x1 = int(x1)
+                y1 = int(y1)
+                x2 = int(x2)
+                y2 = int(y2)
 
-                    frame_face = frame[y1:y2, x1:x2]
-                    gender, age = gender_age(frame_face,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet)
+                # frame_face = frame[y1:y2, x1:x2]
+                # gender, age = gender_age(frame_face,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet)
 
-                    objectId = objectId + 1
-                    cv2.rectangle(frame, (x1 - 5, y1), (x2 - 5, y2), (0, 0, 255), 2)
-                    text = "ID: {} {} {}".format(objectId, gender, age)
-                    cv2.putText(frame, text, (x1, y1 - 5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
+                objectId = objectId + 1
+                cv2.rectangle(frame, (x1 - 5, y1), (x2 - 5, y2), (0, 0, 255), 2)
+                text = "ID: {}".format(objectId)
+                cv2.putText(frame, text, (x1, y1 - 5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
 
             cv2.imshow('result', frame)
 

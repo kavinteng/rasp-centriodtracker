@@ -97,7 +97,7 @@ def gender_age(frame,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderN
 def load_all_model():
     print('start load model!!!')
     model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-    model.conf = 0.1
+    model.conf = 0.5
     model.iou = 0.4
     print('load yolov5 successfully!!!')
 
@@ -140,7 +140,7 @@ def main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNe
             break
         else:
             break_vdo = 2
-            results = model(frame, size=320)
+            results = model(frame, size=640)
             out2 = results.pandas().xyxy[0]
 
             if len(out2) != 0:
@@ -170,12 +170,12 @@ def main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNe
                     x2 = int(x2)
                     y2 = int(y2)
 
-                    frame_face = frame[y1:y2, x1:x2]
-                    gender, age = gender_age(frame_face,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet)
+                    # frame_face = frame[y1:y2, x1:x2]
+                    # gender, age = gender_age(frame_face,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet)
 
                     objectId = objectId + 1
                     cv2.rectangle(frame, (x1 - 5, y1), (x2 - 5, y2), (0, 0, 255), 2)
-                    text = "ID: {} {} {}".format(objectId, gender, age)
+                    text = "ID: {}".format(objectId)
                     cv2.putText(frame, text, (x1, y1 - 5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
 
             cv2.imshow('result', frame)
@@ -226,7 +226,7 @@ def main(rtsp,device):
 
             video_size = (640, 360)
             fourcc = cv2.VideoWriter_fourcc(*'H264')
-            rec = cv2.VideoWriter(file, fourcc, 45, video_size)
+            rec = cv2.VideoWriter(file, fourcc, 30, video_size)
 
             record = 1
         if st == None:

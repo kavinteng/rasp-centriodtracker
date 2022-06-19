@@ -25,14 +25,14 @@ def run_process(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderN
     while True:
         if os.path.isdir(f'backup_file/{date}') == True:
             if len(os.listdir(f'backup_file/{date}')) > 0:
-                file = os.listdir(f'backup_file/{date}')
-                file_name = f'backup_file/{date}/{file[0]}'
-                break_vdo = main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet,model)
+                for file in os.listdir(f'backup_file/{date}'):
+                    file_name = f'backup_file/{date}/{file}'
+                    break_vdo = main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet,model)
 
-                if break_vdo == 2:
-                    post_data_out()
-                    os.remove(f'{file_name}')
-                    break_vdo = 0
+                    if break_vdo == 2:
+                        post_data_out()
+                        os.remove(f'{file_name}')
+                        break_vdo = 0
         if break_vdo == 1:
             break
 

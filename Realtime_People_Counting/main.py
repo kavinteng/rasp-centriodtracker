@@ -9,6 +9,7 @@ import numpy as np
 import argparse, imutils
 import time, dlib, cv2, datetime
 from itertools import zip_longest
+import torch
 
 
 
@@ -56,18 +57,23 @@ def non_max_suppression_fast(boxes, overlapThresh):
         print("Exception occurred in non_max_suppression : {}".format(e))
 
 def run(rtsp):
+	print('start load model!!!')
+	model = torch.hub.load('ultralytics/yolov5', 'yolov5l', pretrained=True)
+	model.conf = 0.5
+	model.iou = 0.4
+	print('load yolov5 successfully!!!')
 
 	# initialize the list of class labels MobileNet SSD was trained to
 	# detect
-	CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
-		"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
-		"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
-		"sofa", "train", "tvmonitor"]
-
-	# load our serialized model from disk
-	protopath = "mobilenet_ssd/MobileNetSSD_deploy.prototxt"
-	modelpath = "mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
-	net = cv2.dnn.readNetFromCaffe(prototxt=protopath, caffeModel=modelpath)
+	# CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
+	# 	"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+	# 	"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
+	# 	"sofa", "train", "tvmonitor"]
+	#
+	# # load our serialized model from disk
+	# protopath = "mobilenet_ssd/MobileNetSSD_deploy.prototxt"
+	# modelpath = "mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
+	# net = cv2.dnn.readNetFromCaffe(prototxt=protopath, caffeModel=modelpath)
 
 	# if a video path was not supplied, grab a reference to the ip camera
 	vs = cv2.VideoCapture(rtsp)
@@ -143,43 +149,35 @@ def run(rtsp):
 
 			# convert the frame to a blob and pass the blob through the
 			# network and obtain the detections
-			blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
-			net.setInput(blob)
-			detections = net.forward()
+			results = model(frame, size=320)
+			out2 = results.pandas().xyxy[0]
 
-			# loop over the detections
-			for i in np.arange(0, detections.shape[2]):
-				# extract the confidence (i.e., probability) associated
-				# with the prediction
-				confidence = detections[0, 0, i, 2]
-
-				# filter out weak detections by requiring a minimum
-				# confidence
-				if confidence > 0.4:
-					# extract the index of the class label from the
-					# detections list
-					idx = int(detections[0, 0, i, 1])
-
-					# if the class label is not a person, ignore it
-					if CLASSES[idx] != "person":
+			if len(out2) != 0:
+				rects = []
+				for i in range(len(out2)):
+					output_landmark = []
+					xmin = int(out2.iat[i, 0])
+					ymin = int(out2.iat[i, 1])
+					xmax = int(out2.iat[i, 2])
+					ymax = int(out2.iat[i, 3])
+					obj_name = out2.iat[i, 6]
+					if obj_name != 'person':
 						continue
-
-					# compute the (x, y)-coordinates of the bounding box
-					# for the object
-					box = detections[0, 0, i, 3:7] * np.array([W, H, W, H])
-					(startX, startY, endX, endY) = box.astype("int")
+					if obj_name == 'person' or obj_name == '0':
+						# box = [xmin,ymin,xmax,ymax]
+						# (startX, startY, endX, endY) = box.astype("int")
 
 
-					# construct a dlib rectangle object from the bounding
-					# box coordinates and then start the dlib correlation
-					# tracker
-					tracker = dlib.correlation_tracker()
-					rect = dlib.rectangle(startX, startY, endX, endY)
-					tracker.start_track(rgb, rect)
+						# construct a dlib rectangle object from the bounding
+						# box coordinates and then start the dlib correlation
+						# tracker
+						tracker = dlib.correlation_tracker()
+						rect = dlib.rectangle(xmin,ymin,xmax,ymax)
+						tracker.start_track(rgb, rect)
 
-					# add the tracker to our list of trackers so we can
-					# utilize it during skip frames
-					trackers.append(tracker)
+						# add the tracker to our list of trackers so we can
+						# utilize it during skip frames
+						trackers.append(tracker)
 
 		# otherwise, we should utilize our object *trackers* rather than
 		# object *detectors* to obtain a higher frame processing throughput

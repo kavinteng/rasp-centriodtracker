@@ -149,7 +149,7 @@ def run(rtsp):
 
 			# convert the frame to a blob and pass the blob through the
 			# network and obtain the detections
-			results = model(frame, size=320)
+			results = model(frame, size=640)
 			out2 = results.pandas().xyxy[0]
 
 			if len(out2) != 0:

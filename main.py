@@ -6,6 +6,8 @@ import datetime
 import torch
 import numpy as np
 from centroidtracker import CentroidTracker
+from tkinter import *
+import tkinter.simpledialog
 
 def non_max_suppression_fast(boxes, overlapThresh):
     try:
@@ -96,7 +98,7 @@ def gender_age(frame,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderN
 
 def load_all_model():
     print('start load model!!!')
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5n', pretrained=True)
     model.conf = 0.5
     model.iou = 0.4
     print('load yolov5 successfully!!!')
@@ -149,45 +151,45 @@ def main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNe
             break
         else:
             break_vdo = 2
-            (H, W) = frame.shape[:2]
-
-            blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
-
-            detector.setInput(blob)
-            person_detections = detector.forward()
-            rects = []
-            for i in np.arange(0, person_detections.shape[2]):
-                # เป็น class อะไร
-                idx = int(person_detections[0, 0, i, 1])
-                if CLASSES[idx] != "person":
-                    continue
-                # ความน่าจะเป็นของ class นั้นเท่าไหร่
-                confidence = person_detections[0, 0, i, 2]
-                if confidence > 0.1:
-                    person_box = person_detections[0, 0, i, 3:7] * np.array([W, H, W, H])
-                    # print(person_box)
-                    rects.append(person_box)
-            # results = model(frame, size=320)
-            # out2 = results.pandas().xyxy[0]
+            # (H, W) = frame.shape[:2]
             #
-            # if len(out2) != 0:
-            #     rects = []
-            #     for i in range(len(out2)):
-            #         output_landmark = []
-            #         xmin = int(out2.iat[i, 0])
-            #         ymin = int(out2.iat[i, 1])
-            #         xmax = int(out2.iat[i, 2])
-            #         ymax = int(out2.iat[i, 3])
-            #         obj_name = out2.iat[i, 6]
-            #         if obj_name != 'person':
-            #             continue
-            #         if obj_name == 'person' or obj_name == '0':
-            #             rects.append([xmin, ymin, xmax, ymax])
+            # blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
+            #
+            # detector.setInput(blob)
+            # person_detections = detector.forward()
+            # rects = []
+            # for i in np.arange(0, person_detections.shape[2]):
+            #     # เป็น class อะไร
+            #     idx = int(person_detections[0, 0, i, 1])
+            #     if CLASSES[idx] != "person":
+            #         continue
+            #     # ความน่าจะเป็นของ class นั้นเท่าไหร่
+            #     confidence = person_detections[0, 0, i, 2]
+            #     if confidence > 0.1:
+            #         person_box = person_detections[0, 0, i, 3:7] * np.array([W, H, W, H])
+            #         # print(person_box)
+            #         rects.append(person_box)
+            results = model(frame, size=640)
+            out2 = results.pandas().xyxy[0]
+
+            if len(out2) != 0:
+                rects = []
+                for i in range(len(out2)):
+                    output_landmark = []
+                    xmin = int(out2.iat[i, 0])
+                    ymin = int(out2.iat[i, 1])
+                    xmax = int(out2.iat[i, 2])
+                    ymax = int(out2.iat[i, 3])
+                    obj_name = out2.iat[i, 6]
+                    if obj_name != 'person':
+                        continue
+                    if obj_name == 'person' or obj_name == '0':
+                        rects.append([xmin, ymin, xmax, ymax])
             # tracking config & non max suppression
             # print(rects)
             boundingboxes = np.array(rects)
             boundingboxes = boundingboxes.astype(int)
-            rects = non_max_suppression_fast(boundingboxes, 0.3)
+            rects = non_max_suppression_fast(boundingboxes, 0.1)
             # print(rects)
             objects = tracker.update(rects)
             for (objectId, bbox) in objects.items():
@@ -275,7 +277,36 @@ def main(rtsp,device):
     cap.release()
     cv2.destroyWindow(f'{device}')
 
+def admin_control():
+    global admin_root
+    Tk().withdraw()
+    while True:
+        passw = tkinter.simpledialog.askstring("Password", "Enter password:", show='*')
+        if passw == 'Advice#128' or passw == None:
+            break
+    if passw == None:
+        admin_root = Tk()
+        admin_root.geometry('200x200+0+400')
+        admin_root.title('ADMIN_Controller')
+        num_report = Label(admin_root, text='ADMIN-CONTROLLER', fg='red', font=('Arial', 12))
+        num_report.pack(padx=5, pady=5)
+        git_c = Button(admin_root, text="git pull", width=20, bg='red', fg='white', command=git_c_botton)
+        git_c.pack(padx=5, pady=5)
+        restart = Button(admin_root, text="restart", width=20, bg='red', fg='white', command=restart_botton)
+        restart.pack(padx=5, pady=5)
+        admin_root.mainloop()
 
+def git_c_botton():
+    # os.system('cd C:/app/packing-video-capture')
+    out = os.system('git pull')
+    if out == 0:
+        os.execv(sys.executable, ['python'] + sys.argv)
+    elif out == 1:
+        git_pull_fall = Label(admin_root, text='git pull fall', fg='red', font=('Arial', 10))
+        git_pull_fall.pack(padx=5, pady=5)
+
+def restart_botton():
+    os.execv(sys.executable, ['python'] + sys.argv)
 
 if __name__ == '__main__':
     rtsp_input = sys.argv[1]

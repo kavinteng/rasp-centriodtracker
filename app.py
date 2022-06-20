@@ -4,7 +4,7 @@ import os
 from threading import Thread
 import sys
 import datetime
-from main import main_process, load_all_model,post_data_out
+from main import main_process, load_all_model,post_data_out,admin_control
 
 def confirm_yesno(message = 'ยืนยันที่จะปิดโปรแกรมหรือไม่'):
     if messagebox.askyesno(title='confirmation',message=message):
@@ -59,8 +59,8 @@ if __name__ == '__main__':
     cam3 = Button(root, text="cam3", width=20, bg='red', fg='white', command=lambda num=3: click_cam_thread(num))
     cam3.pack(padx=5, pady=5)
 
-    # admin = Button(root, text="ADMIN", width=20, bg='red', fg='white', command=admin_control)
-    # admin.pack(padx=5, pady=5, side="bottom")
+    admin = Button(root, text="ADMIN", width=20, bg='red', fg='white', command=admin_control)
+    admin.pack(padx=5, pady=5, side="bottom")
 
     root.protocol('WM_DELETE_WINDOW', confirm_yesno)
     # root.attributes('-topmost', True)

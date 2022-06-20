@@ -8,7 +8,6 @@ import numpy as np
 from centroidtracker import CentroidTracker
 from tkinter import *
 import tkinter.simpledialog
-from threading import Thread
 
 def non_max_suppression_fast(boxes, overlapThresh):
     try:
@@ -99,7 +98,7 @@ def gender_age(frame,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderN
 
 def load_all_model():
     print('start load model!!!')
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5l', pretrained=True)
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5n', pretrained=True)
     model.conf = 0.5
     model.iou = 0.4
     print('load yolov5 successfully!!!')
@@ -152,40 +151,40 @@ def main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNe
             break
         else:
             break_vdo = 2
-            # (H, W) = frame.shape[:2]
-            #
-            # blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
-            #
-            # detector.setInput(blob)
-            # person_detections = detector.forward()
-            # rects = []
-            # for i in np.arange(0, person_detections.shape[2]):
-            #     # เป็น class อะไร
-            #     idx = int(person_detections[0, 0, i, 1])
-            #     if CLASSES[idx] != "person":
-            #         continue
-            #     # ความน่าจะเป็นของ class นั้นเท่าไหร่
-            #     confidence = person_detections[0, 0, i, 2]
-            #     if confidence > 0.1:
-            #         person_box = person_detections[0, 0, i, 3:7] * np.array([W, H, W, H])
-            #         # print(person_box)
-            #         rects.append(person_box)
-            results = model(frame, size=640)
-            out2 = results.pandas().xyxy[0]
+            (H, W) = frame.shape[:2]
 
-            if len(out2) != 0:
-                rects = []
-                for i in range(len(out2)):
-                    output_landmark = []
-                    xmin = int(out2.iat[i, 0])
-                    ymin = int(out2.iat[i, 1])
-                    xmax = int(out2.iat[i, 2])
-                    ymax = int(out2.iat[i, 3])
-                    obj_name = out2.iat[i, 6]
-                    if obj_name != 'person':
-                        continue
-                    if obj_name == 'person' or obj_name == '0':
-                        rects.append([xmin, ymin, xmax, ymax])
+            blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
+
+            detector.setInput(blob)
+            person_detections = detector.forward()
+            rects = []
+            for i in np.arange(0, person_detections.shape[2]):
+                # เป็น class อะไร
+                idx = int(person_detections[0, 0, i, 1])
+                if CLASSES[idx] != "person":
+                    continue
+                # ความน่าจะเป็นของ class นั้นเท่าไหร่
+                confidence = person_detections[0, 0, i, 2]
+                if confidence > 0.1:
+                    person_box = person_detections[0, 0, i, 3:7] * np.array([W, H, W, H])
+                    # print(person_box)
+                    rects.append(person_box)
+            # results = model(frame, size=640)
+            # out2 = results.pandas().xyxy[0]
+            #
+            # if len(out2) != 0:
+            #     rects = []
+            #     for i in range(len(out2)):
+            #         output_landmark = []
+            #         xmin = int(out2.iat[i, 0])
+            #         ymin = int(out2.iat[i, 1])
+            #         xmax = int(out2.iat[i, 2])
+            #         ymax = int(out2.iat[i, 3])
+            #         obj_name = out2.iat[i, 6]
+            #         if obj_name != 'person':
+            #             continue
+            #         if obj_name == 'person' or obj_name == '0':
+            #             rects.append([xmin, ymin, xmax, ymax])
             # tracking config & non max suppression
             # print(rects)
             boundingboxes = np.array(rects)
@@ -309,32 +308,10 @@ def git_c_botton():
 def restart_botton():
     os.execv(sys.executable, ['python'] + sys.argv)
 
-def run_process(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model,detector,CLASSES):
-    date = datetime.date.today()
-    break_vdo = 0
-    while True:
-        if os.path.isdir(f'backup_file/{date}') == True:
-            if len(os.listdir(f'backup_file/{date}')) > 0:
-                for file in os.listdir(f'backup_file/{date}'):
-                    file_name = f'backup_file/{date}/{file}'
-                    break_vdo = main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet,model,detector,CLASSES)
-
-                    if break_vdo == 2:
-                        post_data_out()
-                        os.remove(f'{file_name}')
-                        break_vdo = 0
-        if break_vdo == 1:
-            break
-
 if __name__ == '__main__':
     rtsp_input = sys.argv[1]
     device = sys.argv[2]
     if rtsp_input == 'rtsp_subtype':
         rtsp_input = 'rtsp://test:advice128@110.49.125.237:554/cam/realmonitor?channel=1&subtype=0'
 
-    MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model, detector, CLASSES = load_all_model()
-    p = Thread(target=run_process,
-               args=(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model, detector, CLASSES,))
-    p.daemon = True
-    p.start()
     main(rtsp_input,device)

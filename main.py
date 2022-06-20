@@ -8,6 +8,7 @@ import numpy as np
 from centroidtracker import CentroidTracker
 from tkinter import *
 import tkinter.simpledialog
+from threading import Thread
 
 def non_max_suppression_fast(boxes, overlapThresh):
     try:

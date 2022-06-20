@@ -239,6 +239,20 @@ def main(rtsp,device):
 
         frame = cv2.resize(frame,(640,360))
 
+        lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+        l_channel, a, b = cv2.split(lab)
+
+        # Applying CLAHE to L-channel
+        # feel free to try different values for the limit and grid size:
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        cl = clahe.apply(l_channel)
+
+        # merge the CLAHE enhanced L-channel with the a and b channel
+        limg = cv2.merge((cl, a, b))
+
+        # Converting image from LAB Color model to BGR color spcae
+        frame = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+
         if record == 0:
             a = datetime.datetime.now().strftime("%T")
             a = a.replace(':', '-')

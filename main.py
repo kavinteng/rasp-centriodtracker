@@ -189,9 +189,9 @@ def main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNe
             # print(rects)
             boundingboxes = np.array(rects)
             boundingboxes = boundingboxes.astype(int)
-            rects = non_max_suppression_fast(boundingboxes, 0.1)
+            # rects = non_max_suppression_fast(boundingboxes, 0.3)
             # print(rects)
-            objects = tracker.update(rects)
+            objects = tracker.update(boundingboxes)
             for (objectId, bbox) in objects.items():
                 x1, y1, x2, y2 = bbox
                 x1 = int(x1)

@@ -98,7 +98,7 @@ def gender_age(frame,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderN
 
 def load_all_model():
     print('start load model!!!')
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5n', pretrained=True)
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5l', pretrained=True)
     model.conf = 0.5
     model.iou = 0.4
     print('load yolov5 successfully!!!')

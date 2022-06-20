@@ -308,10 +308,32 @@ def git_c_botton():
 def restart_botton():
     os.execv(sys.executable, ['python'] + sys.argv)
 
+def run_process(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model,detector,CLASSES):
+    date = datetime.date.today()
+    break_vdo = 0
+    while True:
+        if os.path.isdir(f'backup_file/{date}') == True:
+            if len(os.listdir(f'backup_file/{date}')) > 0:
+                for file in os.listdir(f'backup_file/{date}'):
+                    file_name = f'backup_file/{date}/{file}'
+                    break_vdo = main_process(break_vdo,file_name,MODEL_MEAN_VALUES,ageList,genderList,faceNet,ageNet,genderNet,model,detector,CLASSES)
+
+                    if break_vdo == 2:
+                        post_data_out()
+                        os.remove(f'{file_name}')
+                        break_vdo = 0
+        if break_vdo == 1:
+            break
+
 if __name__ == '__main__':
     rtsp_input = sys.argv[1]
     device = sys.argv[2]
     if rtsp_input == 'rtsp_subtype':
         rtsp_input = 'rtsp://test:advice128@110.49.125.237:554/cam/realmonitor?channel=1&subtype=0'
 
+    MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model, detector, CLASSES = load_all_model()
+    p = Thread(target=run_process,
+               args=(MODEL_MEAN_VALUES, ageList, genderList, faceNet, ageNet, genderNet, model, detector, CLASSES,))
+    p.daemon = True
+    p.start()
     main(rtsp_input,device)
